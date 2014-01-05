@@ -21,13 +21,18 @@ class DeltaInverter:
             '\x11\x08': ('AC V Avg',0,1,'V'),
             '\x11\x09': ('AC P Avg',0,1,'W'),
             '\x13\x03': ('Day Wh',0,1,'Wh'),
+            '\x14\x03': ('Week Wh',0,1,'Wh'),
+            '\x15\x03': ('Month Wh',0,1,'Wh'),
+            '\x16\x03': ('Year Wh',11,1,'Wh'),
+            '\x17\x03': ('Total Wh',11,1,'Wh'),
             '\x13\x04': ('Uptime',0,1,'min'),
             '\x00\x00': ('Inverter Type',9,0,''),
             '\x00\x01': ('Serial',1,0,''),
             '\x00\x08': ('Part',1,0,''),
             '\x00\x40': ('FW Version',10,0,''),                        
             '\x20\x05': ('AC Temp',0,1,'o'),
-            '\x21\x08': ('DC Temp',0,1,'o')
+            '\x21\x08': ('DC Temp',0,1,'o'),
+            '\x10\x0A': ('AC Freq',0,100.0,'Hz')
             };
 
 
@@ -68,6 +73,9 @@ class DeltaInverter:
             elif fmt==10: ##FWVersion #
                 resp,invNum,size,instruction,ver,major,minor = struct.unpack('>BBB2sBBB',cmdcontents)
                 return self.cmds[instruction][0]+": " + str(ver) +"." + str(major)+ "."+ str(minor)
+            elif fmt==11: ##Large Numbers
+                resp,invNum,size,instruction,value = struct.unpack('>BBB2sl',cmdcontents)
+                value = value / divisor
             else:
                 resp,invNum,size,instruction,value = struct.unpack('>BBB2s%ds' % lendata,cmdcontents)
             return self.cmds[instruction][0] + ": " + str(value) + " "+unit
@@ -130,6 +138,9 @@ class DeltaInverter:
             elif fmt==10: ##FWVersion #
                 resp,invNum,size,instruction,ver,major,minor = struct.unpack('>BBB2sBBB',cmdcontents)
                 return str(ver) +"." + str(major)+ "."+ str(minor)
+            elif fmt==11: ##Large Numbers
+                resp,invNum,size,instruction,value = struct.unpack('>BBB2sl',cmdcontents)
+                value = value / divisor
             else:
                 resp,invNum,size,instruction,value = struct.unpack('>BBB2s%ds' % lendata,cmdcontents)
             return str(value)
