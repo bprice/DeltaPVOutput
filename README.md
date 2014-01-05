@@ -24,7 +24,9 @@ WebSolarLog
 This allows WebSolarLog to run DeltaPvOutput
 
 1) cd to WebSolarLog (/usr/share/nginx/www/websolarlog)
+
 2) cd to devices (./classes/devices)
+
 3) git clone https://github.com/bprice/DeltaPVOutput.git DeltaSoliviaPy
 
 
