@@ -44,6 +44,13 @@ def getString(connection,inv,string):
     theReturn = str(value)
     return theReturn
 
+def printHelp():
+    print "\nDeltaSolivia.py [command] [port] [inverter ID] \n\n"
+    print "commands:\n"
+    print "\n".join(t_commands)
+    print "\nIf no command arguments are used then script will read config.ini file\n"
+    sys.exit()
+
 import time, subprocess,serial,sys,string,ConfigParser
 from deltaInv import DeltaInverter
 from time import localtime, strftime
@@ -67,7 +74,7 @@ if __name__ == '__main__':
 
       for case in switch(t_command.lower()):
         if case(t_commands[0]): #getalarms
-           print "Fehler -------"
+           print "Fehler -------" #WebSolarLog expects this
            break
         if case(t_commands[1]): pass #getdata
         if case(t_commands[2]): #getlivedata
@@ -116,7 +123,7 @@ if __name__ == '__main__':
              t_year = t_year/10
              t_total = getFloat(connection,inv1,'Total Wh')
              t_total = t_total/10
-             print "Global State:          Run"
+             print "Global State:          Run" #must be because we got respose.
              print "Inverter State:        Run"
              print "Channel 1 Dc/Dc State: MPPT"
              print "Alarm State:           No Alarm"
@@ -154,15 +161,18 @@ if __name__ == '__main__':
            break
         if case(): #default
            print " DeltaSolivia.py [command] [port] [inverter ID] \n\n"
-           print " commands:\n"
-           print "\n".join(t_commands)
+           print " Commands:\n"
+           print "\n ".join(t_commands)
            break
         connection.close()
     else:
-        #print " DeltaSolivia.py [command] [port] [inverter ID] \n\n"
-        #print " commands:\n"
-        #print "\n".join(t_commands)
-        #print "\n"
+        if len(sys.argv)>1:
+          printHelp()
+          #print "\nDeltaSolivia.py [command] [port] [inverter ID] \n\n"
+          #print "commands:\n"
+          #print "\n".join(t_commands)
+          #print "\nIf no command arguments are used then script will read config.ini file\n"
+          #sys.exit()
         
         Config = ConfigParser.ConfigParser()
         Config.read("./config.ini")
@@ -191,12 +201,6 @@ if __name__ == '__main__':
             InvNo =  Config.getint(section,'InvNo')
           except:
             InvNo = 1
-
-          #print SystemID
-          #print APIKey
-          #print Port
-          #print PortSpeed
-          #print InvNo
           
           connection = serial.Serial(Port,PortSpeed,timeout=0.2);
           localtime = time.localtime(time.time())
@@ -204,36 +208,24 @@ if __name__ == '__main__':
           t_date = 'd={0}'.format(strftime('%Y%m%d'))
           t_time = 't={0}'.format(strftime('%H:%M'))
 
-          inv1 = DeltaInverter(InvNo) #init Inverter 1
+          inv1 = DeltaInverter(InvNo) #init Inverter
           #Get the Daily Energy thus far
           cmd = inv1.getCmdStringFor('Day Wh')
           connection.write(cmd)
           response = connection.read(100)
           #if no response the inverter is asleep
           if response:
-            value = inv1.getValueFromResponse(response)
-            t_energy = 'v1={0}'.format(value)
+            value = str(inv1.getValueFromResponse(response))
+            t_energy = 'v1='+value
 
             #instanteous power
-            cmd = inv1.getCmdStringFor('AC Power')
-            connection.write(cmd)
-            response = connection.read(100)
-            value = inv1.getValueFromResponse(response)
-            t_power = 'v2={0}'.format(value)
+            t_power = 'v2='+getString(connection,inv1,'AC Power')
 
             #AC Voltage
-            cmd = inv1.getCmdStringFor('AC Volts')
-            connection.write(cmd)
-            response = connection.read(100)
-            value = inv1.getValueFromResponse(response)
-            t_volts = 'v6={0}'.format(value)
+            t_volts = 'v6='+getString(connection,inv1,'AC Volts')
 
             #Temp - this appears to be onboard somewhere not the heatsink
-            cmd = inv1.getCmdStringFor('DC Temp')
-            connection.write(cmd)
-            response = connection.read(100)
-            value = inv1.getValueFromResponse(response)
-            t_temp = 'v5={0}'.format(value)
+            t_temp = 'v5='+getString(connection,inv1,'AC Temp')
 
             #Send it all off to PVOutput.org
             cmd = ['/usr/bin/curl',
@@ -246,8 +238,8 @@ if __name__ == '__main__':
                 '-H', 'X-Pvoutput-Apikey: ' + APIKey,
                 '-H', 'X-Pvoutput-SystemId: ' + str(SystemID),
                 'http://pvoutput.org/service/r1/addstatus.jsp']
-            #print cmd
             ret = subprocess.call (cmd)
           else:
-            print "No response from inverter - shutdown? No Data sent to PVOutput.org"
+            print "No response from inverter - shutdown?"
+            printHelp()
           connection.close()
