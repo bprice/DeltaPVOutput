@@ -227,6 +227,13 @@ if __name__ == '__main__':
             #Temp - this appears to be onboard somewhere not the heatsink
             t_temp = 'v5='+getString(connection,inv1,'AC Temp')
 
+            #Extended Values
+            t_volts1 = 'v7='+getString(connection,inv1,'DC Volts1')
+            t_dcPavg = 'v8='+getString(connection,inv1,'DC P Avg')
+            t_acPavg = 'v9='+getString(connection,inv1,'AC P Avg')
+            t_dcPmax = 'v10='+getString(connection,inv1,'DC P Max')
+            t_acPmax = 'v11='+getString(connection,inv1,'AC P Max')
+
             #Send it all off to PVOutput.org
             cmd = ['/usr/bin/curl',
                 '-d', t_date,
@@ -235,6 +242,11 @@ if __name__ == '__main__':
                 '-d', t_power,
                 '-d', t_volts,
                 '-d', t_temp,
+                '-d', t_volts1,
+                '-d', t_dcPavg,
+                '-d', t_acPavg,
+                '-d', t_dcPmax,
+                '-d', t_acPmax,
                 '-H', 'X-Pvoutput-Apikey: ' + APIKey,
                 '-H', 'X-Pvoutput-SystemId: ' + str(SystemID),
                 'http://pvoutput.org/service/r1/addstatus.jsp']

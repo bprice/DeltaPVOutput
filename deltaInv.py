@@ -17,6 +17,11 @@ class DeltaInverter:
             '\x10\x07': ('AC Current',0,10.0,'A'),
             '\x10\x08': ('AC Volts',0,1,'V'),            
             '\x10\x09': ('AC Power',0,1,'W'),
+            
+            '\x11\x01': ('DC I Avg',0,10.0,'A'),
+            '\x11\x02': ('DC V Avg',0,1,'V'),
+            '\x11\x03': ('DC P Avg',0,1,'W'),
+
             '\x11\x07': ('AC I Avg',0,10.0,'A'),
             '\x11\x08': ('AC V Avg',0,1,'V'),
             '\x11\x09': ('AC P Avg',0,1,'W'),
@@ -32,6 +37,8 @@ class DeltaInverter:
             '\x00\x40': ('FW Version',10,0,''),                        
             '\x20\x05': ('AC Temp',0,1,'o'),
             '\x21\x08': ('DC Temp',0,1,'o'),
+            '\x12\x03': ('DC P Max',0,1,'W'),
+            '\x12\x0A': ('AC P Max',0,1,'W'),
             '\x10\x0A': ('AC Freq',0,100.0,'Hz')
             };
 
